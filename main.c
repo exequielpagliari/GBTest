@@ -91,6 +91,8 @@ void SetupLevel(struct Sprite *to)
 	*to++ = Sp4;
 	*to++ = Sp5;
 	*to = Sp6;
+	
+	
 }
 
 void main(void)
@@ -111,41 +113,22 @@ void main(void)
 	struct Sprite	Hl0 = {50,50,6,6,7,HOLE_VRAM_INDEX};
 	struct Sprite Sp[6];
 	SetupLevel(Sp);
-
-	
-	
-	
-
-	
-
-    
-	
-	
-	set_sprite_data(0,PLAYER_SPRITE_START,TileLabel);
-    set_sprite_tile(0,0);
-	
-	Player.x = 84;
-	Player.y = 88;
-	
-    move_sprite(Player.id,Player.x,Player.y);
-
 	for(uint8_t i=0;i<6;i++)
 		move_sprite(Sp[i].id,Sp[i].x+4,Sp[i].y+12);
-
-
-
-	move_sprite(Hl0.id,Hl0.x+4,Hl0.y+14);
-    
-	
-	// Set our default position
-
-	Player.x = 80; Player.y = 72;
-
-	
-
     // Set our default velocity to be moving down and to the right
     velocityX=1;
     velocityY=1;
+
+	set_sprite_data(0,PLAYER_SPRITE_START,TileLabel);
+    set_sprite_tile(0,0);
+	Player.x = 80; Player.y = 72;
+    velocityX=1;
+    velocityY=1;
+	move_sprite(Player.id,Player.x,Player.y);
+	
+	
+	move_sprite(Hl0.id,Hl0.x+4,Hl0.y+14);
+
     // Loop forever
     while(1) {
 
@@ -180,19 +163,11 @@ void main(void)
 			move_sprite(Sp[i].id,Sp[i].x+4,Sp[i].y+12);
 		}
 
-/*
-		if(boxX<spriteX+2 && boxX + 2> spriteX && boxY<spriteY-2 && boxY>spriteY+2)
-				{
-				spriteX = prevSpriteX;
-				spriteY = prevSpriteY;
-				}
-				*/
+
 		// When we get too far to the right while moving to the right
         if((Player.x>156)){
 
-            // Switch directions for our x velocity
-            //velocityX=-velocityX;
-
+            
             // Clamp our x position back down to 156 so we don't go past the edge
             Player.x=156;
         }
@@ -200,9 +175,7 @@ void main(void)
         // When we get too far down on the screen while moving downards
         if((Player.y>140)){
 
-            // Switch directions for our y velocity
-            //velocityY=-velocityY;
-
+           
             // Clamp our y position back down to 140 so we don't go past the edge
             Player.y=140;
         }
@@ -210,18 +183,13 @@ void main(void)
         // When we get too far to the left while moving left
         if((Player.x<4)){
 
-            // Switch directions for our x velocity
-            //velocityX=-velocityX;
-
+            
             // Clamp our x position back up to 4 so we don't go past the edge
             Player.x=4;
         }
 
         // When we get too far towards the top of the screen while moving upwards
         if((Player.y<4)){
-
-            // Switch directions for our y velocity
-            //velocityY=-velocityY;
 
             // Clamp our y position back up to 4 so we don't go past the edge
             Player.y=4;
