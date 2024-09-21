@@ -1,4 +1,6 @@
 #include <gb/gb.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "TileLabel.h"
@@ -16,13 +18,13 @@ uint8_t spriteX,spriteY;
 uint8_t boxX = 20, boxY = 20;
 int8_t velocityX,velocityY;
 
-typedef struct {
+typedef struct Sprite{
     uint8_t x, y, width, height, id, vram;
 } Sprite;
 
 
 
-bool collides(Sprite sprite1, Sprite sprite2) {
+bool collides(struct Sprite sprite1, struct Sprite sprite2) {
     return sprite1.x < sprite2.x + sprite2.width &&
            sprite1.x + sprite1.width > sprite2.x &&
            sprite1.y < sprite2.y + sprite2.height &&
@@ -43,7 +45,7 @@ void SetupPlayer(){
 }
 */
 
-void UpdateInput(Sprite *Player)
+void UpdateInput(struct Sprite *Player)
 {
 	// Apply our velocity
 		if(joypad() & J_UP)
@@ -56,19 +58,39 @@ void UpdateInput(Sprite *Player)
 		Player->x+=velocityX;
 }
 
-void MoveColliderPlayer(Sprite sprite1, Sprite sprite2, uint8_t prevSpriteX, uint8_t prevSpriteY)
+void MoveColliderPlayer(struct Sprite *sprite1, struct Sprite *sprite2, int *x, int *y)
 {
-				if(sprite1.x - prevSpriteX !=0)
+				if(sprite1->x - *x !=0)
 				{
-					sprite2.x += sprite1.x - prevSpriteX;
-					move_sprite(sprite2.id,sprite2.x+4,sprite2.y+12);
+					sprite2->x += sprite1->x - *x; // Modify sprite2.x using pointer
+					move_sprite(sprite2->id, sprite2->x + 4, sprite2->y + 12);
 				}
-				if(sprite1.y - prevSpriteY !=0)
+				if(sprite1->y - *y !=0)
 				{
-					sprite2.y += sprite1.y - prevSpriteY;
-					move_sprite(sprite2.id,sprite2.x+4,sprite2.y+12);
+					sprite2->y += sprite1->y - *y; // Modify sprite2.y using pointer
+					move_sprite(sprite2->id, sprite2->x + 4, sprite2->y + 12);
 				}
+				sprite1->x = *x;
+				sprite1->y = *y;
 
+}
+
+void SetupLevel(struct Sprite *to)
+{
+	struct Sprite Sp1 = {20,20,4,4,1,BOX_VRAM_INDEX};
+	struct Sprite Sp2 = {60,120,4,4,2,BOX_VRAM_INDEX};
+	struct Sprite Sp3 = {40,100,4,4,3,BOX_VRAM_INDEX};
+	struct Sprite Sp4 = {100,20,4,4,4,BOX_VRAM_INDEX};
+	struct Sprite Sp5 = {130,90,4,4,5,BOX_VRAM_INDEX};
+	struct Sprite Sp6 = {35,35,4,4,6,BOX_VRAM_INDEX};
+	
+
+	*to++ = Sp1;
+	*to++ = Sp2;
+	*to++ = Sp3;
+	*to++ = Sp4;
+	*to++ = Sp5;
+	*to = Sp6;
 }
 
 void main(void)
@@ -76,21 +98,24 @@ void main(void)
 	DISPLAY_ON;
     SHOW_SPRITES;
 
-	auto Sprite Player = {0 , 0 , 4, 4,0,0};
-	auto Sprite Sp1 = {20,20,4,4,1,BOX_VRAM_INDEX};
-	auto Sprite Sp2 = {60,120,4,4,2,BOX_VRAM_INDEX};
-	auto Sprite Sp3 = {40,100,4,4,3,BOX_VRAM_INDEX};
-	auto Sprite Sp4 = {100,20,4,4,4,BOX_VRAM_INDEX};
-	auto Sprite Sp5 = {130,90,4,4,5,BOX_VRAM_INDEX};
-	auto Sprite Sp6 = {35,35,4,4,6,BOX_VRAM_INDEX};
-
-	auto Sprite	Hl0 = {50,50,6,6,7,HOLE_VRAM_INDEX};
-	
-    set_sprite_data(1,BOX_SPRITE_START,box);
+	//Config Sprites
+	set_sprite_data(1,BOX_SPRITE_START,box);
 	set_sprite_data(2,1,Hole);
 	set_sprite_tile(7,2);
 	for(uint8_t i=1;i<7;i++)
 	set_sprite_tile(i,BOX_VRAM_INDEX);
+
+
+	//config ObjectsInitial
+	struct Sprite Player = {0 , 0 , 4, 4,0,0};
+	struct Sprite	Hl0 = {50,50,6,6,7,HOLE_VRAM_INDEX};
+	struct Sprite Sp[6];
+	SetupLevel(Sp);
+
+	
+	
+	
+
 	
 
     
@@ -104,20 +129,17 @@ void main(void)
 	
     move_sprite(Player.id,Player.x,Player.y);
 
-	move_sprite(Sp1.id,Sp1.x+4,Sp1.y+12);
-	move_sprite(Sp2.id,Sp2.x+4,Sp2.y+12);
-	move_sprite(Sp3.id,Sp3.x+4,Sp3.y+12);
-	move_sprite(Sp4.id,Sp4.x+4,Sp4.y+12);
-	move_sprite(Sp5.id,Sp5.x+4,Sp5.y+12);
-	move_sprite(Sp6.id,Sp6.x+4,Sp6.y+12);
+	for(uint8_t i=0;i<6;i++)
+		move_sprite(Sp[i].id,Sp[i].x+4,Sp[i].y+12);
+
 
 
 	move_sprite(Hl0.id,Hl0.x+4,Hl0.y+14);
-    // Set our default position
+    
+	
+	// Set our default position
 
-	Player.x = 80;
-
-	Player.y = 72;
+	Player.x = 80; Player.y = 72;
 
 	
 
@@ -129,109 +151,18 @@ void main(void)
 
 
 		// Game main loop processing goes here
-		uint8_t prevSpriteY = Player.y;
-		uint8_t prevSpriteX = Player.x;
+		int prevSpriteY = Player.y;
+
+		int prevSpriteX = Player.x;
+
 
 		UpdateInput(&Player);
 
 
-
-		if(collides(Player,Sp1))
+		for(uint8_t i=0;i<6;i++)
+		if(collides(Player,Sp[i]))
 		{
-				//MoveColliderPlayer(Player,Sp1,prevSpriteX,prevSpriteY);
-				if(Player.x - prevSpriteX !=0)
-				{
-					Sp1.x += Player.x - prevSpriteX;
-					move_sprite(Sp1.id,Sp1.x+4,Sp1.y+12);
-				}
-				if(Player.y - prevSpriteY !=0)
-				{
-					Sp1.y += Player.y - prevSpriteY;
-					move_sprite(Sp1.id,Sp1.x+4,Sp1.y+12);
-				}
-				Player.x = prevSpriteX;
-				Player.y = prevSpriteY;
-				
-		}
-		
-		if(collides(Player,Sp2))
-		{
-				if(Player.x - prevSpriteX !=0)
-				{
-					Sp2.x += Player.x - prevSpriteX;
-					move_sprite(Sp2.id,Sp2.x+4,Sp2.y+12);
-				}
-				if(Player.y - prevSpriteY !=0)
-				{
-					Sp2.y += Player.y - prevSpriteY;
-					move_sprite(Sp2.id,Sp2.x+4,Sp2.y+12);
-				}
-				Player.x = prevSpriteX;
-				Player.y = prevSpriteY;
-		}
-		
-		if(collides(Player,Sp3))
-		{
-							if(Player.x - prevSpriteX !=0)
-				{
-					Sp3.x += Player.x - prevSpriteX;
-					move_sprite(Sp3.id,Sp3.x+4,Sp3.y+12);
-				}
-				if(Player.y - prevSpriteY !=0)
-				{
-					Sp3.y += Player.y - prevSpriteY;
-					move_sprite(Sp3.id,Sp3.x+4,Sp3.y+12);
-				}
-				Player.x = prevSpriteX;
-				Player.y = prevSpriteY;
-		}
-		
-		if(collides(Player,Sp4))
-		{
-							if(Player.x - prevSpriteX !=0)
-				{
-					Sp4.x += Player.x - prevSpriteX;
-					move_sprite(Sp4.id,Sp4.x+4,Sp4.y+12);
-				}
-				if(Player.y - prevSpriteY !=0)
-				{
-					Sp4.y += Player.y - prevSpriteY;
-					move_sprite(Sp4.id,Sp4.x+4,Sp4.y+12);
-				}
-				Player.x = prevSpriteX;
-				Player.y = prevSpriteY;
-		}
-		
-		if(collides(Player,Sp5))
-		{
-							if(Player.x - prevSpriteX !=0)
-				{
-					Sp5.x += Player.x - prevSpriteX;
-					move_sprite(Sp5.id,Sp5.x+4,Sp5.y+12);
-				}
-				if(Player.y - prevSpriteY !=0)
-				{
-					Sp5.y += Player.y - prevSpriteY;
-					move_sprite(Sp5.id,Sp5.x+4,Sp5.y+12);
-				}
-				Player.x = prevSpriteX;
-				Player.y = prevSpriteY;
-		}
-		
-				if(collides(Player,Sp6))
-		{
-							if(Player.x - prevSpriteX !=0)
-				{
-					Sp6.x += Player.x - prevSpriteX;
-					move_sprite(Sp6.id,Sp6.x+4,Sp6.y+12);
-				}
-				if(Player.y - prevSpriteY !=0)
-				{
-					Sp6.y += Player.y - prevSpriteY;
-					move_sprite(Sp6.id,Sp6.x+4,Sp6.y+12);
-				}
-				Player.x = prevSpriteX;
-				Player.y = prevSpriteY;
+				MoveColliderPlayer(&Player,&Sp[i],&prevSpriteX,&prevSpriteY);
 		}
 		
 		if(collides(Player,Hl0))
@@ -239,14 +170,16 @@ void main(void)
 				Player.x = prevSpriteX;
 				Player.y = prevSpriteY;
 		}
-		/*
-		if(collides(Hl0,Sp1)
+		
+		
+		for(uint8_t i=0;i<6;i++)
+		if(collides(Hl0,Sp[i]))
 		{
-			Sp1.x = -10;
-			Sp1.y = -10;
-			move_sprite(Sp1.id,Sp1.x+4,Sp1.y+12);
+			Sp[i].x = -10;
+			Sp[i].y = -10;
+			move_sprite(Sp[i].id,Sp[i].x+4,Sp[i].y+12);
 		}
-		*/
+
 /*
 		if(boxX<spriteX+2 && boxX + 2> spriteX && boxY<spriteY-2 && boxY>spriteY+2)
 				{
