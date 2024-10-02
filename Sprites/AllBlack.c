@@ -1,8 +1,8 @@
 /*
 
- HOLE.H
+ ALLBLACK.C
 
- Include File.
+ Tile Source File.
 
  Info:
   Form                 : All tiles as one unit.
@@ -22,14 +22,11 @@
 
 */
 
-#ifndef __Hole_h_INCLUDE
-#define __Hole_h_INCLUDE
-
-/* Bank of tiles. */
-#define HoleBank 0
 /* Start of tile array. */
-extern const unsigned char Hole[];
+const unsigned char AllBlack[] =
+{
+  0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+  0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+};
 
-#endif
-
-/* End of HOLE.H */
+/* End of ALLBLACK.C */

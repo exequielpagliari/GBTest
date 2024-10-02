@@ -1,6 +1,6 @@
 /*
 
- TILELABEL.H
+ PLATAFORM.H
 
  Include File.
 
@@ -22,14 +22,14 @@
 
 */
 
-#ifndef __TileLabel_h_INCLUDE
-#define __TileLabel_h_INCLUDE
+#ifndef __Plataform_h_INCLUDE
+#define __Plataform_h_INCLUDE
 
 /* Bank of tiles. */
-#define TileLabelBank 0
+#define PlataformBank 0
 /* Start of tile array. */
-extern const unsigned char TileLabel[];
+extern const unsigned char Plataform[];
 
 #endif
 
-/* End of TILELABEL.H */
+/* End of PLATAFORM.H */

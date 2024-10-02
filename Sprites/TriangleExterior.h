@@ -1,6 +1,6 @@
 /*
 
- BOX.H
+ TRIANGLEEXTERIOR.H
 
  Include File.
 
@@ -22,14 +22,14 @@
 
 */
 
-#ifndef __box_h_INCLUDE
-#define __box_h_INCLUDE
+#ifndef __TriangleExterior_h_INCLUDE
+#define __TriangleExterior_h_INCLUDE
 
 /* Bank of tiles. */
-#define TileLabelBank 0
+#define TriangleExteriorBank 0
 /* Start of tile array. */
-extern const unsigned char box[];
+extern const unsigned char TriangleExterior[];
 
 #endif
 
-/* End of BOX.H */
+/* End of TRIANGLEEXTERIOR.H */

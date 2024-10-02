@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "TileLabel.h"
-#include "box.h"
-#include "Hole.h"
+#include "Sprites/Box.h"
+#include "Sprites/Player.h"
+#include "Sprites/Plataform.h"
+#include "Sprites/Wall.h"
 
 
 #define PLAYER_SPRITE_START 1
@@ -22,6 +23,30 @@ typedef struct Sprite{
     uint8_t x, y, width, height, id, vram;
 } Sprite;
 
+typedef struct Door{
+    Sprite *sprite;
+	bool open;
+} Door;
+
+typedef struct box{
+    struct Sprite sprite;
+} box;
+
+typedef struct wall{
+    Sprite *sprite;
+	bool open;
+} wall;
+
+typedef struct SWTR{
+    Sprite *sprite;
+	bool complete;
+	Door *door;
+} SWTR;
+
+typedef struct KYTR{
+    Sprite *sprite;
+	bool activate;
+} KYTR;
 
 
 bool collides(struct Sprite sprite1, struct Sprite sprite2) {
@@ -75,24 +100,24 @@ void MoveColliderPlayer(struct Sprite *sprite1, struct Sprite *sprite2, int *x, 
 
 }
 
-void SetupLevel(struct Sprite *to)
+void SetupLevel(struct box *to)
 {
-	struct Sprite Sp1 = {20,20,4,4,1,BOX_VRAM_INDEX};
-	struct Sprite Sp2 = {60,120,4,4,2,BOX_VRAM_INDEX};
-	struct Sprite Sp3 = {40,100,4,4,3,BOX_VRAM_INDEX};
-	struct Sprite Sp4 = {100,20,4,4,4,BOX_VRAM_INDEX};
-	struct Sprite Sp5 = {130,90,4,4,5,BOX_VRAM_INDEX};
-	struct Sprite Sp6 = {35,35,4,4,6,BOX_VRAM_INDEX};
+	struct box Box1 = {{20,20,8,8,1,BOX_VRAM_INDEX}};
+	struct box Box2 = {{60,120,8,8,2,BOX_VRAM_INDEX}};
+	struct box Box3 = {{40,100,8,8,3,BOX_VRAM_INDEX}};
+	struct box Box4 = {{100,20,8,8,4,BOX_VRAM_INDEX}};
+	struct box Box5 = {{130,90,8,8,5,BOX_VRAM_INDEX}};
+	struct box Box6 = {{35,35,8,8,6,BOX_VRAM_INDEX}};
 	
 
-	*to++ = Sp1;
-	*to++ = Sp2;
-	*to++ = Sp3;
-	*to++ = Sp4;
-	*to++ = Sp5;
-	*to = Sp6;
+	*to++ = Box1;
+	*to++ = Box2;
+	*to++ = Box3;
+	*to++ = Box4;
+	*to++ = Box5;
+	*to = Box6;
 	
-	
+		
 }
 
 void main(void)
@@ -101,25 +126,26 @@ void main(void)
     SHOW_SPRITES;
 
 	//Config Sprites
-	set_sprite_data(1,BOX_SPRITE_START,box);
-	set_sprite_data(2,1,Hole);
+	set_sprite_data(1,BOX_SPRITE_START,Box);
+	set_sprite_data(2,1,Plataform);
 	set_sprite_tile(7,2);
 	for(uint8_t i=1;i<7;i++)
 	set_sprite_tile(i,BOX_VRAM_INDEX);
 
 
 	//config ObjectsInitial
-	struct Sprite Player = {0 , 0 , 4, 4,0,0};
-	struct Sprite	Hl0 = {50,50,6,6,7,HOLE_VRAM_INDEX};
-	struct Sprite Sp[6];
-	SetupLevel(Sp);
+	struct Sprite Player = {0 , 0 , 8, 8,0,0};
+	struct Sprite	Hl0 = {50,50,8,8,7,HOLE_VRAM_INDEX};
+	struct box Box[6];
+	//struct Sprite Sp[6];
+	SetupLevel(Box);
 	for(uint8_t i=0;i<6;i++)
-		move_sprite(Sp[i].id,Sp[i].x+4,Sp[i].y+12);
+		move_sprite(Box[i].sprite.id,Box[i].sprite.x+4,Box[i].sprite.y+12);
     // Set our default velocity to be moving down and to the right
     velocityX=1;
     velocityY=1;
 
-	set_sprite_data(0,PLAYER_SPRITE_START,TileLabel);
+	set_sprite_data(0,PLAYER_SPRITE_START,PlayerSprite);
     set_sprite_tile(0,0);
 	Player.x = 80; Player.y = 72;
     velocityX=1;
@@ -127,7 +153,7 @@ void main(void)
 	move_sprite(Player.id,Player.x,Player.y);
 	
 	
-	move_sprite(Hl0.id,Hl0.x+4,Hl0.y+14);
+	move_sprite(Hl0.id,Hl0.x+4,Hl0.y+12);
 
     // Loop forever
     while(1) {
@@ -143,9 +169,9 @@ void main(void)
 
 
 		for(uint8_t i=0;i<6;i++)
-		if(collides(Player,Sp[i]))
+		if(collides(Player,Box[i].sprite))
 		{
-				MoveColliderPlayer(&Player,&Sp[i],&prevSpriteX,&prevSpriteY);
+				MoveColliderPlayer(&Player,&Box[i].sprite,&prevSpriteX,&prevSpriteY);
 		}
 		
 		if(collides(Player,Hl0))
@@ -156,11 +182,11 @@ void main(void)
 		
 		
 		for(uint8_t i=0;i<6;i++)
-		if(collides(Hl0,Sp[i]))
+		if(collides(Hl0,Box[i].sprite))
 		{
-			Sp[i].x = -10;
-			Sp[i].y = -10;
-			move_sprite(Sp[i].id,Sp[i].x+4,Sp[i].y+12);
+			Box[i].sprite.x = -10;
+			Box[i].sprite.y = -10;
+			move_sprite(Box[i].sprite.id,Box[i].sprite.x+4,Box[i].sprite.y+12);
 		}
 
 

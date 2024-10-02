@@ -1,8 +1,8 @@
 /*
 
- BOX.C
+ TRIANGLEINTERIOR.H
 
- Tile Source File.
+ Include File.
 
  Info:
   Form                 : All tiles as one unit.
@@ -22,11 +22,14 @@
 
 */
 
-/* Start of tile array. */
-const unsigned char box[] =
-{
-  0x00,0x00,0x00,0x00,0x38,0x1C,0x24,0x24,
-  0x24,0x24,0x1C,0x38,0x00,0x00,0x00,0x00
-};
+#ifndef __TriangleInterior_h_INCLUDE
+#define __TriangleInterior_h_INCLUDE
 
-/* End of BOX.C */
+/* Bank of tiles. */
+#define TriangleInteriorBank 0
+/* Start of tile array. */
+extern const unsigned char TriangleInterior[];
+
+#endif
+
+/* End of TRIANGLEINTERIOR.H */
