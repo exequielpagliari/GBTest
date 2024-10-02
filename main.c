@@ -7,12 +7,16 @@
 #include "Sprites/Player.h"
 #include "Sprites/Plataform.h"
 #include "Sprites/Wall.h"
+#include "Sprites/DoorOpen.h"
+#include "Sprites/DoorClose.h"
+
 
 
 #define PLAYER_SPRITE_START 1
 #define BOX_SPRITE_START 1
 #define BOX_VRAM_INDEX 1
 #define HOLE_VRAM_INDEX 2
+#define WALL_VRAM_INDEX 3
 #define OAM_PLAYER 0
 
 uint8_t spriteX,spriteY;
@@ -24,7 +28,9 @@ typedef struct Sprite{
 } Sprite;
 
 typedef struct Door{
-    Sprite *sprite;
+	Sprite sprite;
+    Sprite spriteOpen;
+	Sprite spriteClose;
 	bool open;
 } Door;
 
@@ -33,18 +39,21 @@ typedef struct box{
 } box;
 
 typedef struct wall{
-    Sprite *sprite;
-	bool open;
+    Sprite sprite;
 } wall;
 
+typedef struct plataform{
+    Sprite sprite;
+} plataform;
+
 typedef struct SWTR{
-    Sprite *sprite;
+    Sprite sprite;
 	bool complete;
 	Door *door;
 } SWTR;
 
 typedef struct KYTR{
-    Sprite *sprite;
+    Sprite sprite;
 	bool activate;
 } KYTR;
 
@@ -128,14 +137,28 @@ void main(void)
 	//Config Sprites
 	set_sprite_data(1,BOX_SPRITE_START,Box);
 	set_sprite_data(2,1,Plataform);
+	set_sprite_data(3,1,Wall);
+	set_sprite_data(4,1,DoorOpen);
+	set_sprite_data(5,1,DoorClose);
 	set_sprite_tile(7,2);
+	//set_sprite_tile(8,3);
+	//set_sprite_tile(2,4);
 	for(uint8_t i=1;i<7;i++)
 	set_sprite_tile(i,BOX_VRAM_INDEX);
-
+	for(uint8_t i=8;i<17;i++)
+	set_sprite_tile(i,WALL_VRAM_INDEX);
+	struct Sprite wa1 = {100,100,8,8,8,WALL_VRAM_INDEX};
+	struct Sprite wa2 = {90,140,8,8,9,WALL_VRAM_INDEX};
+	struct Sprite wa3 = {90,60,8,8,10,WALL_VRAM_INDEX};
+	struct Sprite wa4 = {150,40,8,8,11,WALL_VRAM_INDEX};
+	move_sprite(wa1.id,wa1.x,wa1.y);
+	move_sprite(wa2.id,wa2.x,wa2.y);
+	move_sprite(wa3.id,wa3.x,wa3.y);
+	move_sprite(wa4.id,wa4.x,wa4.y);
 
 	//config ObjectsInitial
 	struct Sprite Player = {0 , 0 , 8, 8,0,0};
-	struct Sprite	Hl0 = {50,50,8,8,7,HOLE_VRAM_INDEX};
+	struct plataform plat = {{50,50,8,8,7,HOLE_VRAM_INDEX}};
 	struct box Box[6];
 	//struct Sprite Sp[6];
 	SetupLevel(Box);
@@ -153,7 +176,7 @@ void main(void)
 	move_sprite(Player.id,Player.x,Player.y);
 	
 	
-	move_sprite(Hl0.id,Hl0.x+4,Hl0.y+12);
+	move_sprite(plat.sprite.id,plat.sprite.x+4,plat.sprite.y+12);
 
     // Loop forever
     while(1) {
@@ -174,7 +197,7 @@ void main(void)
 				MoveColliderPlayer(&Player,&Box[i].sprite,&prevSpriteX,&prevSpriteY);
 		}
 		
-		if(collides(Player,Hl0))
+		if(collides(Player,plat.sprite))
 		{
 				Player.x = prevSpriteX;
 				Player.y = prevSpriteY;
@@ -182,7 +205,7 @@ void main(void)
 		
 		
 		for(uint8_t i=0;i<6;i++)
-		if(collides(Hl0,Box[i].sprite))
+		if(collides(plat.sprite,Box[i].sprite))
 		{
 			Box[i].sprite.x = -10;
 			Box[i].sprite.y = -10;
